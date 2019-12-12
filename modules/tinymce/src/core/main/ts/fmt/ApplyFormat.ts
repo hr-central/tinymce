@@ -179,7 +179,8 @@ const applyFormat = function (ed: Editor, name: string, vars?, node?) {
 
         // Is it valid to wrap this item
         // TODO: Break this if up, too complex
-        if (contentEditable && !hasContentEditableState && FormatUtils.isValid(ed, wrapName, nodeName) && FormatUtils.isValid(ed, parentName, wrapName) &&
+        const allowCeFalseWrap = node.nodeType === 1 && node.getAttribute('class') && ~node.getAttribute('class').indexOf('mceAllowWrap');
+        if ((allowCeFalseWrap || contentEditable && !hasContentEditableState) && FormatUtils.isValid(ed, wrapName, nodeName) && FormatUtils.isValid(ed, parentName, wrapName) &&
           !(!nodeSpecific && node.nodeType === 3 &&
             node.nodeValue.length === 1 &&
             node.nodeValue.charCodeAt(0) === 65279) &&
@@ -206,6 +207,9 @@ const applyFormat = function (ed: Editor, name: string, vars?, node?) {
 
           // End the last wrapper
           currentWrapElm = 0;
+        }
+        if (allowCeFalseWrap && hasContentEditableState) {
+          contentEditable = lastContentEditable; // Restore last contentEditable state from stack
         }
       };
 
